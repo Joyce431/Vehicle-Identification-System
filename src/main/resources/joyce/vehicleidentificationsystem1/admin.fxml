@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="vbox1" alignment="TOP_CENTER" prefWidth="900" spacing="15" style="-fx-background-color: gray;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="joyce.vehicleidentificationsystem1.AdminController">
+
+    <padding>
+        <Insets bottom="20" left="20" right="20" top="20" />
+    </padding>
+
+    <Label fx:id="label1" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Admin Module - User Management &amp; System Control" />
+
+    <Separator />
+
+    <!-- User Management -->
+    <TitledPane fx:id="titlepane" expanded="true" text="User Management">
+        <VBox spacing="10">
+            <HBox fx:id="user" alignment="CENTER_LEFT" spacing="10">
+                <Label fx:id="userid" text="User ID:" />
+                <TextField fx:id="userIdField" editable="false" onAction="#userIdField" prefWidth="100" promptText="Auto-generated" />
+                <Label fx:id="name" text="Name:" />
+                <TextField fx:id="userNameField" onAction="#userNameField" prefWidth="150" />
+                <Label fx:id="role" text="Role:" />
+                <ComboBox fx:id="roleCombo" onAction="#roleCombo" prefWidth="120" />
+                <Button fx:id="createuser" onAction="#createUser" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Create User" />
+            </HBox>
+
+            <TableView fx:id="userTable" prefHeight="200">
+                <columns>
+                    <TableColumn fx:id="userIdCol" prefWidth="80" text="User ID" />
+                    <TableColumn fx:id="userNameCol" prefWidth="150" text="Name" />
+                    <TableColumn fx:id="userRoleCol" prefWidth="100" text="Role" />
+                    <TableColumn fx:id="userStatusCol" prefWidth="100" text="Status" />
+                </columns>
+            </TableView>
+
+            <HBox alignment="CENTER_RIGHT" spacing="10">
+                <Button fx:id="access" onAction="#grantAccess" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="Grant Access" />
+                <Button fx:id="revoke" onAction="#revokeAccess" style="-fx-background-color: #f44336; -fx-text-fill: white;" text="Revoke Access" />
+            </HBox>
+        </VBox>
+    </TitledPane>
+
+    <!-- System Statistics -->
+    <TitledPane fx:id="statistics" expanded="true" text="System Statistics">
+        <GridPane hgap="20" vgap="10">
+            <padding><Insets bottom="10" left="10" right="10" top="10" /></padding>
+
+            <Label fx:id="total" style="-fx-font-weight: bold;" text="Total Vehicles:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <Label fx:id="totalVehiclesLabel" text="0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+            <Label fx:id="toalUser" style="-fx-font-weight: bold;" text="Total Users:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <Label fx:id="totalUsersLabel" text="0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+            <Label fx:id="activeReports" style="-fx-font-weight: bold;" text="Active Police Reports:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <Label fx:id="activeReportsLabel" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+            <Label fx:id="unpaid" style="-fx-font-weight: bold;" text="Unpaid Violations:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+            <Label fx:id="unpaidViolationsLabel" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+            <Label fx:id="totalServiceRecords" style="-fx-font-weight: bold;" text="Total Service Records:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+            <Label fx:id="totalServicesLabel" text="0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+         <columnConstraints>
+            <ColumnConstraints fx:id="gridpane" />
+            <ColumnConstraints />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+         </rowConstraints>
+        </GridPane>
+    </TitledPane>
+
+    <!-- Database Operations -->
+    <TitledPane fx:id="dbmangement" expanded="true" text="Database Management">
+        <VBox spacing="10">
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Button fx:id="backpdb" onAction="#backupDatabase" style="-fx-background-color: #FF9800; -fx-text-fill: white;" text="Backup Database" />
+                <Button fx:id="rdb" onAction="#restoreDatabase" style="-fx-background-color: #9C27B0; -fx-text-fill: white;" text="Restore Database" />
+                <Button fx:id="viewlogs" onAction="#viewLogs" style="-fx-background-color: #607D8B; -fx-text-fill: white;" text="View Logs" />
+                <Button fx:id="refreshstatistics" onAction="#refreshStatistics" style="-fx-background-color: #00BCD4; -fx-text-fill: white;" text="Refresh Statistics" />
+            </HBox>
+            <Label fx:id="dbStatusLabel" style="-fx-text-fill: green;" text="Database: Connected" />
+            <ProgressBar fx:id="dbProgress" prefWidth="300" progress="0.0" visible="false" />
+        </VBox>
+    </TitledPane>
+
+    <!-- Recent Activity Log -->
+    <TitledPane fx:id="recentActivityLog" expanded="false" text="Recent Activity Log">
+        <ListView fx:id="activityLogList" prefHeight="150">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="[2024-01-15 10:30] User admin logged in" />
+                    <String fx:value="[2024-01-15 09:45] New vehicle registered: ABC123" />
+                    <String fx:value="[2024-01-14 16:20] Violation reported for vehicle XYZ789" />
+                    <String fx:value="[2024-01-14 11:00] Database backup completed" />
+                </FXCollections>
+            </items>
+        </ListView>
+    </TitledPane>
+</VBox>

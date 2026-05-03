@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Pagination?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.effect.DropShadow?>
+<VBox fx:id="vbox1" alignment="TOP_CENTER" prefWidth="900" spacing="15" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="joyce.vehicleidentificationsystem1.CustomerController">
+
+    <padding>
+        <Insets bottom="20" left="20" right="20" top="20" />
+    </padding>
+
+    <Label fx:id="customer" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Customer Module - Vehicle Information &amp; Queries" />
+
+    <Separator fx:id="separator" />
+
+    <!-- Customer Profile -->
+    <TitledPane fx:id="titlepane" expanded="true" text="Customer Profile">
+        <GridPane hgap="10" vgap="10">
+            <padding><Insets bottom="10" left="10" right="10" top="10" /></padding>
+            <Label fx:id="name" style="-fx-font-weight: bold;" text="Name:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <Label fx:id="customerNameLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+            <Label fx:id="email" style="-fx-font-weight: bold;" text="Email:" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+            <Label fx:id="emailLabel" text="-" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+            <Label fx:id="phone" style="-fx-font-weight: bold;" text="Phone:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <Label fx:id="phoneLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Label fx:id="address" style="-fx-font-weight: bold;" text="Address:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <Label fx:id="addressLabel" text="-" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+            <Label fx:id="member" style="-fx-font-weight: bold;" text="Member Since:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <Label fx:id="memberSinceLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+         <columnConstraints>
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+         </rowConstraints>
+        </GridPane>
+    </TitledPane>
+
+    <!-- Customer Vehicles -->
+    <Label fx:id="vehicles" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="My Vehicles" />
+
+    <TableView fx:id="customerVehiclesTable" prefHeight="150">
+        <columns>
+            <TableColumn fx:id="regNumberCol" prefWidth="120" text="Registration No" />
+            <TableColumn fx:id="makeCol" prefWidth="100" text="Make" />
+            <TableColumn fx:id="modelCol" prefWidth="100" text="Model" />
+            <TableColumn fx:id="yearCol" prefWidth="80" text="Year" />
+            <TableColumn fx:id="vehicleStatusCol" prefWidth="100" text="Status" />
+        </columns>
+    </TableView>
+
+    <!-- Vehicle Condition Section -->
+    <Label fx:id="vehicle" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Vehicle Condition Status" />
+
+    <HBox alignment="CENTER" spacing="30" style="-fx-padding: 10; -fx-background-color: #f5f5f5; -fx-border-radius: 5;">
+        <VBox alignment="CENTER" spacing="5">
+            <Label text="Engine Health" />
+            <ProgressIndicator fx:id="engineHealth" prefHeight="60" prefWidth="60" progress="0.85" />
+            <Label style="-fx-text-fill: green;" text="85%" />
+        </VBox>
+        <VBox fx:id="maintenance" alignment="CENTER" spacing="5">
+            <Label text="Maintenance Status" />
+            <ProgressBar fx:id="maintenanceStatus" prefWidth="150" progress="0.70" />
+            <Label text="70% - Good" />
+        </VBox>
+        <VBox alignment="CENTER" spacing="5">
+            <Label text="Insurance Validity" />
+            <ProgressBar fx:id="insuranceValidity" prefWidth="150" progress="0.60" />
+            <Label text="60% Remaining" />
+        </VBox>
+        <VBox alignment="CENTER" spacing="5">
+            <Label text="Overall Rating" />
+            <ProgressIndicator fx:id="overallRating" prefHeight="60" prefWidth="60" progress="0.72" />
+            <Label text="72%" />
+        </VBox>
+    </HBox>
+
+    <!-- Query Section -->
+    <TitledPane fx:id="raise" expanded="true" text="Raise a Query">
+        <VBox spacing="10">
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label fx:id="select" text="Select Vehicle:" />
+                <ComboBox fx:id="vehicleSelect" onAction="#vehicleSelect" prefWidth="250" promptText="Select Vehicle" />
+            </HBox>
+            <Label fx:id="query" text="Your Query:" />
+            <TextArea fx:id="queryTextArea" prefHeight="80" promptText="Enter your query here..." wrapText="true" />
+            <HBox alignment="CENTER_RIGHT">
+                <Button fx:id="submit" onAction="#submitQuery" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-padding: 8 20;" text="Submit Query">
+                    <effect>
+                        <DropShadow color="gray" offsetX="2" offsetY="2" radius="3" />
+                    </effect>
+                </Button>
+            </HBox>
+        </VBox>
+    </TitledPane>
+
+    <!-- Query Responses -->
+    <Label fx:id="history" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Query History &amp; Responses" />
+
+    <TableView fx:id="queryHistoryTable" prefHeight="200">
+        <columns>
+            <TableColumn fx:id="queryDateCol" prefWidth="100" text="Query Date" />
+            <TableColumn fx:id="queryVehicleCol" prefWidth="120" text="Vehicle" />
+            <TableColumn fx:id="queryTextCol" prefWidth="250" text="Query" />
+            <TableColumn fx:id="responseTextCol" prefWidth="250" text="Response" />
+            <TableColumn fx:id="queryStatusCol" prefWidth="80" text="Status" />
+        </columns>
+    </TableView>
+
+    <!-- Pagination for Query History -->
+    <Pagination fx:id="queryPagination" maxPageIndicatorCount="5" pageCount="5" />
+</VBox>

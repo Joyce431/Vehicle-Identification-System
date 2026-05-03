@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="vbox" alignment="TOP_CENTER" prefWidth="900" spacing="15" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="joyce.vehicleidentificationsystem1.WorkshopController">
+
+    <padding>
+        <Insets bottom="20" left="20" right="20" top="20" />
+    </padding>
+
+    <Label fx:id="workshop" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Workshop Module - Vehicle Registration &amp; Service Records" />
+
+    <Separator fx:id="separator" />
+
+    <!-- Register New Vehicle -->
+    <TitledPane fx:id="titlepane" expanded="true" text="Register New Vehicle">
+        <GridPane fx:id="gritpane" hgap="10" vgap="10">
+            <padding><Insets bottom="10" left="10" right="10" top="10" /></padding>
+
+            <Label fx:id="label1" text="Registration Number:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <TextField fx:id="regNumberField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+            <Label fx:id="label2" text="Make:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <TextField fx:id="makeField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+            <Label fx:id="label3" text="Model:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <TextField fx:id="modelField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+            <Label fx:id="label4" text="Year:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+            <TextField fx:id="yearField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+            <Label fx:id="label5" text="Owner Name:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+            <TextField fx:id="ownerNameField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+            <Button fx:id="register" onAction="#registerVehicle" prefWidth="150" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Register Vehicle" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="5" />
+         <columnConstraints>
+            <ColumnConstraints />
+            <ColumnConstraints />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+         </rowConstraints>
+        </GridPane>
+    </TitledPane>
+
+    <!-- Service Record Entry -->
+    <TitledPane fx:id="titlepane2" expanded="true" text="Add Service Record">
+        <GridPane hgap="10" vgap="10">
+            <padding><Insets bottom="10" left="10" right="10" top="10" /></padding>
+
+            <Label text="Select Vehicle:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <ComboBox fx:id="vehicleSelect" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+            <Label text="Service Date:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <DatePicker fx:id="serviceDatePicker" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+            <Label text="Service Type:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <ComboBox fx:id="serviceTypeCombo" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+            <Label text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+            <TextArea fx:id="serviceDescription" prefHeight="60" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+            <Label text="Cost:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+            <TextField fx:id="costField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+            <Button onAction="#addServiceRecord" prefWidth="150" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="Add Service Record" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="5" />
+         <columnConstraints>
+            <ColumnConstraints />
+            <ColumnConstraints />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+         </rowConstraints>
+        </GridPane>
+    </TitledPane>
+
+    <!-- Service History Table -->
+    <Label fx:id="history" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Service History" />
+
+    <TableView fx:id="serviceHistoryTable" prefHeight="250">
+        <columns>
+            <TableColumn fx:id="serviceDateCol" prefWidth="100" text="Service Date" />
+            <TableColumn fx:id="serviceTypeCol" prefWidth="120" text="Service Type" />
+            <TableColumn fx:id="serviceDescCol" prefWidth="250" text="Description" />
+            <TableColumn fx:id="costCol" prefWidth="100" text="Cost" />
+        </columns>
+    </TableView>
+
+    <!-- ScrollPane with Vehicle List -->
+    <Label fx:id="registered" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Registered Vehicles" />
+
+    <ScrollPane fx:id="scrollpane" fitToWidth="true" prefHeight="150">
+        <VBox fx:id="vehicleListContainer" spacing="5">
+            <Label fx:id="text1" text="1. ABC123 - Toyota Camry 2020 - Owner: Neo Sello" />
+            <Label fx:id="txt2" text="2. XYZ789 - Honda Civic 2021 - Owner: Joyce Koetle" />
+            <Label fx:id="txt3" text="3. DEF456 - Ford Mustang 2019 - Owner: Tsepo Leboto" />
+            <Label fx:id="txt4" text="4. GHI789 - BMW X5 2022 - Owner: Tumo Koloi" />
+            <Label fx:id="txt5" text="5. JKL012 - Mercedes C200 2021 - Owner: Moabi Lereng" />
+        </VBox>
+    </ScrollPane>
+</VBox>

@@ -1,0 +1,136 @@
+/* style.css - External Stylesheet for Dashboard */
+
+/* Dummy ScrollPane Styles */
+.dummy-content-box {
+    -fx-padding: 10;
+}
+
+.dummy-item-even {
+    -fx-padding: 8;
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #ecf0f1;
+    -fx-border-width: 0 0 1 0;
+}
+
+.dummy-item-odd {
+    -fx-padding: 8;
+    -fx-border-color: #ecf0f1;
+    -fx-border-width: 0 0 1 0;
+}
+
+.dummy-number {
+    -fx-font-weight: bold;
+    -fx-text-fill: #3498db;
+    -fx-min-width: 35;
+}
+
+.dummy-content {
+    -fx-text-fill: #2c3e50;
+    -fx-font-size: 13px;
+}
+
+/* ========== RECENT ACTIVITIES STYLES - BLACK TEXT ========== */
+.activity-item {
+    -fx-padding: 8;
+    -fx-background-color: #f8f9fa;
+    -fx-background-radius: 5;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 0 0 1 0;
+    -fx-text-fill: #000000;  /* BLACK TEXT */
+    -fx-font-weight: normal;
+}
+
+.activity-item .text {
+    -fx-fill: #000000;  /* BLACK TEXT */
+}
+
+/* ========== VEHICLE RECORDS STYLES - BLACK TEXT ========== */
+.pagination-box {
+    -fx-padding: 15;
+    -fx-background-color: white;
+    -fx-background-radius: 5;
+}
+
+.vehicle-label {
+    -fx-padding: 8;
+    -fx-background-color: #e8f4f8;
+    -fx-background-radius: 5;
+    -fx-text-fill: #000000;  /* BLACK TEXT */
+    -fx-font-weight: bold;
+}
+
+.vehicle-label .text {
+    -fx-fill: #000000;  /* BLACK TEXT */
+}
+
+.page-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #000000;  /* BLACK TEXT (changed from gray to black) */
+    -fx-padding: 5 0 0 0;
+}
+
+/* Violation Dialog Styles */
+.violation-dialog .dialog-pane {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+}
+
+.violation-dialog .header-panel {
+    -fx-background-color: #e74c3c;
+}
+
+.violation-dialog .header-panel .label {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+}
+
+/* TableView Styles */
+.violation-table {
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 5;
+}
+
+.violation-table .column-header {
+    -fx-background-color: #34495e;
+}
+
+.violation-table .column-header .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.violation-table .table-row-cell:odd {
+    -fx-background-color: #f9f9f9;
+}
+
+.violation-table .table-row-cell:selected {
+    -fx-background-color: #3498db;
+}
+
+.violation-table .table-row-cell:selected .text {
+    -fx-fill: white;
+}
+
+/* Progress Indicator Styles */
+.progress-indicator {
+    -fx-progress-color: #3498db;
+}
+
+/* Progress Bar Styles */
+.progress-bar .bar {
+    -fx-background-color: #2ecc71;
+    -fx-background-radius: 5;
+}
+
+.progress-bar .track {
+    -fx-background-color: #ecf0f1;
+}
+
+/* Button Styles */
+.button {
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-opacity: 0.9;
+}

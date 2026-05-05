@@ -12,14 +12,14 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<?import javafx.scene.effect.DropShadow?>
-<VBox fx:id="vbox1" alignment="TOP_CENTER" prefWidth="900" spacing="15" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="joyce.vehicleidentificationsystem1.CustomerController">
+<VBox fx:id="vbox1" alignment="TOP_CENTER" prefWidth="900" spacing="15" style="-fx-background-color: gray;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="joyce.vehicleidentificationsystem1.CustomerController">
 
     <padding>
         <Insets bottom="20" left="20" right="20" top="20" />
@@ -129,5 +129,8 @@
     </TableView>
 
     <!-- Pagination for Query History -->
-    <Pagination fx:id="queryPagination" maxPageIndicatorCount="5" pageCount="5" />
+    <Pagination fx:id="queryPagination" maxPageIndicatorCount="5" pageCount="5">
+      <effect>
+         <DropShadow height="47.38" radius="22.457500000000003" width="44.45" />
+      </effect></Pagination>
 </VBox>

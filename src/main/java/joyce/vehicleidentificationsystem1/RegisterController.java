@@ -1,6 +1,7 @@
 package joyce.vehicleidentificationsystem1;
 
 import javafx.animation.FadeTransition;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -31,8 +32,12 @@ public class RegisterController {
     @FXML private Label statusLabel;
     @FXML private VBox vbox2;
 
+    private DBConnection db;
+
     @FXML
     public void initialize() {
+        db = DatabaseManager.getInstance();
+
         roleCombo.getItems().addAll("Customer", "Police Officer", "Workshop Staff", "Insurance Agent");
         roleCombo.setValue("Customer");
 
@@ -79,7 +84,6 @@ public class RegisterController {
         String password = passwordField.getText();
         String confirmPassword = confirmPasswordField.getText();
 
-        // Validation
         if (fullName.isEmpty() || email.isEmpty() || phone.isEmpty() || address.isEmpty()) {
             statusLabel.setText("Please fill all fields!");
             statusLabel.setStyle("-fx-text-fill: red;");
@@ -101,47 +105,27 @@ public class RegisterController {
             return;
         }
 
-        // Create username from email
         String username = email.split("@")[0];
 
         try {
             // Check if user already exists
             String checkSql = "SELECT COUNT(*) FROM users WHERE username = ? OR email = ?";
-            PreparedStatement checkStmt = DBConnection.getConnection().prepareStatement(checkSql);
-            checkStmt.setString(1, username);
-            checkStmt.setString(2, email);
-            ResultSet rs = checkStmt.executeQuery();
-            rs.next();
-            if (rs.getInt(1) > 0) {
-                statusLabel.setText("Username or email already exists!");
-                statusLabel.setStyle("-fx-text-fill: red;");
-                return;
+            try (ResultSet rs = db.executeQuery(checkSql, username, email)) {
+                rs.next();
+                if (rs.getInt(1) > 0) {
+                    statusLabel.setText("Username or email already exists!");
+                    statusLabel.setStyle("-fx-text-fill: red;");
+                    return;
+                }
             }
 
             // Insert user
             String sql = "INSERT INTO users (username, password, full_name, email, phone, address, role, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')";
-            PreparedStatement pstmt = DBConnection.getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            pstmt.setString(1, username);
-            pstmt.setString(2, password);
-            pstmt.setString(3, fullName);
-            pstmt.setString(4, email);
-            pstmt.setString(5, phone);
-            pstmt.setString(6, address);
-            pstmt.setString(7, role);
-            pstmt.executeUpdate();
-
-            ResultSet generatedKeys = pstmt.getGeneratedKeys();
-            int userId = -1;
-            if (generatedKeys.next()) {
-                userId = generatedKeys.getInt(1);
-            }
+            int userId = db.executeInsert(sql, username, password, fullName, email, phone, address, role);
 
             // If role is Customer, create customer record
-            if (role.equals("Customer")) {
-                String customerSql = "INSERT INTO customers (user_id) VALUES (?)";
-                PreparedStatement customerStmt = DBConnection.getConnection().prepareStatement(customerSql);
-                customerStmt.setInt(1, userId);
-                customerStmt.executeUpdate();
+            if (role.equals("Customer") && userId > 0) {
+                db.executeUpdate("INSERT INTO customers (user_id) VALUES (?)", userId);
             }
 
             statusLabel.setText("Registration successful! Awaiting admin approval. Redirecting...");
@@ -151,7 +135,7 @@ public class RegisterController {
             new Thread(() -> {
                 try {
                     Thread.sleep(2000);
-                    javafx.application.Platform.runLater(() -> {
+                    Platform.runLater(() -> {
                         HelloApplication.switchScene("login.fxml", "Login - Vehicle Identification System", 900, 700);
                     });
                 } catch (InterruptedException e) {

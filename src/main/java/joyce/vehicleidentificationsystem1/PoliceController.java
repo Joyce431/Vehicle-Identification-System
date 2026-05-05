@@ -54,21 +54,21 @@ public class PoliceController {
     private ObservableList<PoliceReport> reports = FXCollections.observableArrayList();
     private int currentVehicleId = -1;
     private String currentVehicleReg = "";
+    private DBConnection db;
 
     @FXML
     public void initialize() {
-        // Setup violation table columns
+        db = DatabaseManager.getInstance();
+
         violationTypeCol.setCellValueFactory(new PropertyValueFactory<>("violationType"));
         violationDateCol.setCellValueFactory(new PropertyValueFactory<>("violationDate"));
         fineAmountCol.setCellValueFactory(new PropertyValueFactory<>("fineAmount"));
         statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
         descriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
 
-        // Setup police report table columns
         reportTypeCol.setCellValueFactory(new PropertyValueFactory<>("reportType"));
         officerNameCol.setCellValueFactory(new PropertyValueFactory<>("officerName"));
 
-        // Setup combo boxes
         violationTypeCombo.getItems().addAll("Speeding", "Parking Violation", "Red Light Violation",
                 "Driving Without License", "No Insurance", "Drunk Driving");
         violationTypeCombo.setValue("Speeding");
@@ -76,13 +76,8 @@ public class PoliceController {
         statusCombo.getItems().addAll("All", "Paid", "Unpaid", "Pending Court");
         statusCombo.setValue("All");
 
-        // Load police reports from database
         loadPoliceReportsFromDatabase();
-
-        // Setup search
         setupSearch();
-
-        // Status combo listener
         statusCombo.setOnAction(e -> filterViolationsByStatus());
     }
 
@@ -90,10 +85,7 @@ public class PoliceController {
         reports.clear();
         String sql = "SELECT report_id, report_type, description, officer_name FROM police_reports ORDER BY report_date DESC";
 
-        try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
+        try (ResultSet rs = db.executeQuery(sql)) {
             while (rs.next()) {
                 PoliceReport report = new PoliceReport(
                         rs.getInt("report_id"),
@@ -104,7 +96,6 @@ public class PoliceController {
                 reports.add(report);
             }
             policeReportTable.setItems(reports);
-
         } catch (SQLException e) {
             System.err.println("Error loading police reports: " + e.getMessage());
         }
@@ -131,10 +122,7 @@ public class PoliceController {
                 "LEFT JOIN users u ON c.user_id = u.user_id " +
                 "WHERE v.registration_number = ?";
 
-        try (PreparedStatement pstmt = DBConnection.getConnection().prepareStatement(sql)) {
-            pstmt.setString(1, regNumber);
-            ResultSet rs = pstmt.executeQuery();
-
+        try (ResultSet rs = db.executeQuery(sql, regNumber)) {
             if (rs.next()) {
                 currentVehicleId = rs.getInt("vehicle_id");
                 makeLabel.setText(rs.getString("make"));
@@ -142,15 +130,9 @@ public class PoliceController {
                 yearLabel.setText(String.valueOf(rs.getInt("year")));
                 String ownerName = rs.getString("owner");
                 ownerLabel.setText(ownerName != null ? ownerName : "Unknown");
-
-                // Load violations for this vehicle
                 loadViolationsForVehicle(currentVehicleId);
-
-                // Enable add violation button
                 addViolation.setDisable(false);
-
             } else {
-                // Vehicle not found
                 currentVehicleId = -1;
                 makeLabel.setText("Not Found");
                 modelLabel.setText("Not Found");
@@ -158,11 +140,8 @@ public class PoliceController {
                 ownerLabel.setText("Not Found");
                 violationHistoryTable.setItems(FXCollections.observableArrayList());
                 history.setText("No violations - Vehicle not found");
-
-                // Disable add violation button
                 addViolation.setDisable(true);
-
-                showAlert("Info", "Vehicle '" + regNumber + "' not found in database. Please register the vehicle first.");
+                showAlert("Info", "Vehicle '" + regNumber + "' not found in database.");
             }
         } catch (SQLException e) {
             System.err.println("Error searching vehicle: " + e.getMessage());
@@ -179,10 +158,7 @@ public class PoliceController {
         String sql = "SELECT violation_id, violation_date, violation_type, fine_amount, status, description " +
                 "FROM violations WHERE vehicle_id = ? ORDER BY violation_date DESC";
 
-        try (PreparedStatement pstmt = DBConnection.getConnection().prepareStatement(sql)) {
-            pstmt.setInt(1, vehicleId);
-            ResultSet rs = pstmt.executeQuery();
-
+        try (ResultSet rs = db.executeQuery(sql, vehicleId)) {
             while (rs.next()) {
                 ViolationRecord violation = new ViolationRecord(
                         rs.getInt("violation_id"),
@@ -195,14 +171,12 @@ public class PoliceController {
                 );
                 vehicleViolations.add(violation);
             }
-
             if (vehicleViolations.isEmpty()) {
                 history.setText("No violations for this vehicle");
             } else {
                 history.setText("Violations: " + vehicleViolations.size());
             }
             violationHistoryTable.setItems(vehicleViolations);
-
         } catch (SQLException e) {
             System.err.println("Error loading vehicle violations: " + e.getMessage());
         }
@@ -226,31 +200,17 @@ public class PoliceController {
         try {
             double fine = Double.parseDouble(fineText);
             String officerName = SessionManager.getCurrentUsername();
-            if (officerName == null) {
-                officerName = "Unknown Officer";
-            }
+            if (officerName == null) officerName = "Unknown Officer";
 
-            // Insert violation into database
             String sql = "INSERT INTO violations (vehicle_id, violation_date, violation_type, fine_amount, status, description, officer_name) " +
                     "VALUES (?, ?, ?, ?, 'Unpaid', ?, ?)";
+            int result = db.executeUpdate(sql, currentVehicleId, Date.valueOf(LocalDate.now()), type, fine,
+                    "Violation recorded for vehicle " + currentVehicleReg, officerName);
 
-            try (PreparedStatement pstmt = DBConnection.getConnection().prepareStatement(sql)) {
-                pstmt.setInt(1, currentVehicleId);
-                pstmt.setDate(2, Date.valueOf(LocalDate.now()));
-                pstmt.setString(3, type);
-                pstmt.setDouble(4, fine);
-                pstmt.setString(5, "Violation recorded for vehicle " + currentVehicleReg);
-                pstmt.setString(6, officerName);
-                pstmt.executeUpdate();
-
+            if (result > 0) {
                 showAlert("Success", "Violation reported successfully!");
-
-                // Refresh the violations list
                 loadViolationsForVehicle(currentVehicleId);
-
                 fineAmountField.clear();
-
-                // Animate button
                 addViolation.setStyle("-fx-background-color: #2ecc71;");
                 new Thread(() -> {
                     try {
@@ -262,9 +222,6 @@ public class PoliceController {
             }
         } catch (NumberFormatException e) {
             showAlert("Error", "Invalid fine amount!");
-        } catch (SQLException e) {
-            System.err.println("Error adding violation: " + e.getMessage());
-            showAlert("Database Error", "Could not add violation: " + e.getMessage());
         }
     }
 
@@ -280,16 +237,12 @@ public class PoliceController {
 
     private void filterViolationsByStatus() {
         String selectedStatus = statusCombo.getValue();
-        if (currentVehicleId == -1) {
-            return;
-        }
-
-        ObservableList<ViolationRecord> currentList = violationHistoryTable.getItems();
-        ObservableList<ViolationRecord> filtered = FXCollections.observableArrayList();
+        if (currentVehicleId == -1) return;
 
         if ("All".equals(selectedStatus)) {
             loadViolationsForVehicle(currentVehicleId);
         } else {
+            ObservableList<ViolationRecord> filtered = FXCollections.observableArrayList();
             for (ViolationRecord v : violationHistoryTable.getItems()) {
                 if (v.getStatus().equals(selectedStatus)) {
                     filtered.add(v);
@@ -314,7 +267,6 @@ public class PoliceController {
     }
 }
 
-// ViolationRecord Class
 class ViolationRecord {
     private int violationId;
     private String vehicleNumber;
@@ -343,7 +295,6 @@ class ViolationRecord {
     public String getDescription() { return description; }
 }
 
-// PoliceReport Class
 class PoliceReport {
     private int reportId;
     private String reportType;

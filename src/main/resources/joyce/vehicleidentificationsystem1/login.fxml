@@ -57,7 +57,10 @@
                 <!-- Login Button -->
                 <Button fx:id="login" onAction="#login" prefHeight="40" prefWidth="340" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10; -fx-background-radius: 5;" text="LOGIN">
                     <effect>
-                        <DropShadow color="rgba(52,152,219,0.5)" offsetX="2" offsetY="2" radius="5" />
+                        <DropShadow height="107.73" offsetX="2.0" offsetY="2.0" radius="53.3625" width="107.72">
+                     <color>
+                        <Color red="0.07000000029802322" green="0.06948667019605637" blue="0.06930000334978104" opacity="0.5" />
+                     </color></DropShadow>
                     </effect>
                 </Button>
 

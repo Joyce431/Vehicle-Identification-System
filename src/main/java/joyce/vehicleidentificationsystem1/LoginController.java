@@ -31,8 +31,13 @@ public class LoginController {
     @FXML private ComboBox<String> roleCombo;
     @FXML private Button login;
 
+    private DBConnection db;
+
     @FXML
     public void initialize() {
+        // Get database connection instance
+        db = DatabaseManager.getInstance();
+
         if (roleCombo != null) {
             roleCombo.getItems().addAll("Admin", "Police Officer", "Customer", "Workshop Staff", "Insurance Agent");
             roleCombo.setValue("Admin");
@@ -50,11 +55,7 @@ public class LoginController {
     }
 
     private void showAllUsers() {
-        try {
-            Connection conn = DBConnection.getConnection();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT user_id, username, full_name, role, status FROM users");
-
+        try (ResultSet rs = db.executeQuery("SELECT user_id, username, full_name, role, status FROM users")) {
             System.out.println("\n=== USERS IN DATABASE ===");
             while (rs.next()) {
                 System.out.println("ID: " + rs.getInt("user_id") +
@@ -64,9 +65,6 @@ public class LoginController {
                         ", Status: " + rs.getString("status"));
             }
             System.out.println("========================\n");
-
-            rs.close();
-            stmt.close();
         } catch (SQLException e) {
             System.err.println("Error: " + e.getMessage());
         }
@@ -125,33 +123,22 @@ public class LoginController {
     private User authenticateFromDatabase(String usernameOrEmail, String password, String role) {
         String sql = "SELECT user_id, username, full_name, email, phone, address, role, status FROM users WHERE (username = ? OR email = ?) AND password = ? AND role = ? AND status = 'Active'";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, usernameOrEmail);
-            pstmt.setString(2, usernameOrEmail);
-            pstmt.setString(3, password);
-            pstmt.setString(4, role);
-
+        try (ResultSet rs = db.executeQuery(sql, usernameOrEmail, usernameOrEmail, password, role)) {
             System.out.println("Attempting login: " + usernameOrEmail + " as " + role);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    User user = new User();
-                    user.setUserId(rs.getInt("user_id"));
-                    user.setUsername(rs.getString("username"));
-                    user.setFullName(rs.getString("full_name"));
-                    user.setEmail(rs.getString("email"));
-                    user.setPhone(rs.getString("phone"));
-                    user.setAddress(rs.getString("address"));
-                    user.setRole(rs.getString("role"));
-                    user.setStatus(rs.getString("status"));
-
-                    System.out.println("✓ Login successful for: " + user.getFullName());
-                    return user;
-                } else {
-                    System.out.println("✗ No active user found with: " + usernameOrEmail + " and role: " + role);
-                }
+            if (rs.next()) {
+                User user = new User();
+                user.setUserId(rs.getInt("user_id"));
+                user.setUsername(rs.getString("username"));
+                user.setFullName(rs.getString("full_name"));
+                user.setEmail(rs.getString("email"));
+                user.setPhone(rs.getString("phone"));
+                user.setAddress(rs.getString("address"));
+                user.setRole(rs.getString("role"));
+                user.setStatus(rs.getString("status"));
+                System.out.println("✓ Login successful for: " + user.getFullName());
+                return user;
+            } else {
+                System.out.println("✗ No active user found with: " + usernameOrEmail + " and role: " + role);
             }
         } catch (SQLException e) {
             System.err.println("Auth error: " + e.getMessage());
@@ -159,10 +146,9 @@ public class LoginController {
         return null;
     }
 
-    // FIXED: Admin now goes to dashboard.fxml instead of admin.fxml
     private String getDashboardForRole(String role) {
         switch(role) {
-            case "Admin": return "dashboard.fxml";        // CHANGED: admin.fxml → dashboard.fxml
+            case "Admin": return "dashboard.fxml";
             case "Police Officer": return "police.fxml";
             case "Customer": return "customer.fxml";
             case "Workshop Staff": return "workshop.fxml";

@@ -9,13 +9,14 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="vbox1" alignment="TOP_CENTER" prefWidth="900" spacing="15" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="joyce.vehicleidentificationsystem1.PoliceController">
+<VBox fx:id="vbox1" alignment="TOP_CENTER" prefWidth="900" spacing="15" style="-fx-background-color: gray;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="joyce.vehicleidentificationsystem1.PoliceController">
 
     <padding>
         <Insets bottom="20" left="20" right="20" top="20" />
@@ -28,7 +29,10 @@
     <HBox fx:id="hbox1" alignment="CENTER_LEFT" spacing="10">
         <Label fx:id="searchVehicle" text="Search Vehicle:" />
         <TextField fx:id="searchField" prefWidth="250" promptText="Enter Registration Number" />
-        <Button fx:id="search" onAction="#searchVehicle" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="Search" />
+        <Button fx:id="search" onAction="#searchVehicle" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="Search">
+         <effect>
+            <DropShadow height="49.83" radius="22.3375" width="41.52" />
+         </effect></Button>
     </HBox>
 
     <TitledPane fx:id="titlepane1" expanded="true" text="Vehicle Details">
@@ -68,7 +72,10 @@
             <Label fx:id="status" text="Status:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
             <ComboBox fx:id="statusCombo" onAction="#statusCombo" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-            <Button fx:id="addViolation" onAction="#addViolation" prefWidth="150" style="-fx-background-color: #f44336; -fx-text-fill: white;" text="Add Violation" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="3" />
+            <Button fx:id="addViolation" onAction="#addViolation" prefWidth="150" style="-fx-background-color: #f44336; -fx-text-fill: white;" text="Add Violation" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="3">
+            <effect>
+               <DropShadow height="35.66" radius="23.9225" width="62.03" />
+            </effect></Button>
          <columnConstraints>
             <ColumnConstraints />
             <ColumnConstraints />

@@ -48,9 +48,13 @@ public class CustomerController {
     private ObservableList<CustomerQuery> queriesList = FXCollections.observableArrayList();
     private int currentCustomerId = -1;
     private User currentUser;
+    private DBConnection db;
 
     @FXML
     public void initialize() {
+        // Get database connection
+        db = DatabaseManager.getInstance();
+
         // Setup table columns using PropertyValueFactory
         regNumberCol.setCellValueFactory(new PropertyValueFactory<>("registrationNumber"));
         makeCol.setCellValueFactory(new PropertyValueFactory<>("make"));
@@ -82,12 +86,9 @@ public class CustomerController {
     }
 
     private void loadCustomerData() {
-        try {
-            String sql = "SELECT u.full_name, u.email, u.phone, u.address, u.created_at FROM users u WHERE u.user_id = ?";
-            PreparedStatement pstmt = DBConnection.getConnection().prepareStatement(sql);
-            pstmt.setInt(1, currentUser.getUserId());
-            ResultSet rs = pstmt.executeQuery();
+        String sql = "SELECT u.full_name, u.email, u.phone, u.address, u.created_at FROM users u WHERE u.user_id = ?";
 
+        try (ResultSet rs = db.executeQuery(sql, currentUser.getUserId())) {
             if (rs.next()) {
                 customerNameLabel.setText(rs.getString("full_name"));
                 emailLabel.setText(rs.getString("email"));
@@ -100,27 +101,21 @@ public class CustomerController {
                 }
                 System.out.println("Customer data loaded for: " + rs.getString("full_name"));
             }
+            rs.close();
 
             // Get customer ID
             String customerSql = "SELECT customer_id FROM customers WHERE user_id = ?";
-            PreparedStatement customerStmt = DBConnection.getConnection().prepareStatement(customerSql);
-            customerStmt.setInt(1, currentUser.getUserId());
-            ResultSet customerRs = customerStmt.executeQuery();
-            if (customerRs.next()) {
-                currentCustomerId = customerRs.getInt("customer_id");
-                System.out.println("Customer ID: " + currentCustomerId);
-            } else {
-                String insertSql = "INSERT INTO customers (user_id, customer_type) VALUES (?, 'Regular')";
-                PreparedStatement insertStmt = DBConnection.getConnection().prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
-                insertStmt.setInt(1, currentUser.getUserId());
-                insertStmt.executeUpdate();
-                ResultSet generatedKeys = insertStmt.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    currentCustomerId = generatedKeys.getInt(1);
+            try (ResultSet customerRs = db.executeQuery(customerSql, currentUser.getUserId())) {
+                if (customerRs.next()) {
+                    currentCustomerId = customerRs.getInt("customer_id");
+                    System.out.println("Customer ID: " + currentCustomerId);
+                } else {
+                    // Create customer record if not exists
+                    String insertSql = "INSERT INTO customers (user_id, customer_type) VALUES (?, 'Regular')";
+                    currentCustomerId = db.executeInsert(insertSql, currentUser.getUserId());
                     System.out.println("Created new customer record with ID: " + currentCustomerId);
                 }
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert("Database Error", "Could not load customer data: " + e.getMessage());
@@ -129,12 +124,9 @@ public class CustomerController {
 
     private void loadVehiclesFromDatabase() {
         vehiclesList.clear();
-        try {
-            String sql = "SELECT registration_number, make, model, year, color, status FROM vehicles WHERE owner_id = ?";
-            PreparedStatement pstmt = DBConnection.getConnection().prepareStatement(sql);
-            pstmt.setInt(1, currentCustomerId);
-            ResultSet rs = pstmt.executeQuery();
+        String sql = "SELECT registration_number, make, model, year, color, status FROM vehicles WHERE owner_id = ?";
 
+        try (ResultSet rs = db.executeQuery(sql, currentCustomerId)) {
             while (rs.next()) {
                 CustomerVehicle cv = new CustomerVehicle(
                         rs.getString("registration_number"),
@@ -159,7 +151,6 @@ public class CustomerController {
             } else {
                 setupVehicleCombo();
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert("Database Error", "Could not load vehicles: " + e.getMessage());
@@ -168,15 +159,12 @@ public class CustomerController {
 
     private void loadQueryHistoryFromDatabase() {
         queriesList.clear();
-        try {
-            String sql = "SELECT cq.query_id, cq.vehicle_id, cq.query_date, cq.query_text, cq.response_text, cq.status, v.registration_number " +
-                    "FROM customer_queries cq " +
-                    "JOIN vehicles v ON cq.vehicle_id = v.vehicle_id " +
-                    "WHERE cq.customer_id = ? ORDER BY cq.query_date DESC";
-            PreparedStatement pstmt = DBConnection.getConnection().prepareStatement(sql);
-            pstmt.setInt(1, currentCustomerId);
-            ResultSet rs = pstmt.executeQuery();
+        String sql = "SELECT cq.query_id, cq.vehicle_id, cq.query_date, cq.query_text, cq.response_text, cq.status, v.registration_number " +
+                "FROM customer_queries cq " +
+                "JOIN vehicles v ON cq.vehicle_id = v.vehicle_id " +
+                "WHERE cq.customer_id = ? ORDER BY cq.query_date DESC";
 
+        try (ResultSet rs = db.executeQuery(sql, currentCustomerId)) {
             while (rs.next()) {
                 queriesList.add(new CustomerQuery(
                         rs.getString("registration_number"),
@@ -188,7 +176,6 @@ public class CustomerController {
             }
             queryHistoryTable.setItems(queriesList);
             history.setText(String.valueOf(queriesList.size()));
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -288,43 +275,33 @@ public class CustomerController {
         try {
             // Get vehicle ID
             String vehicleSql = "SELECT vehicle_id FROM vehicles WHERE registration_number = ?";
-            PreparedStatement vehicleStmt = DBConnection.getConnection().prepareStatement(vehicleSql);
-            vehicleStmt.setString(1, regNumber);
-            ResultSet vehicleRs = vehicleStmt.executeQuery();
+            try (ResultSet vehicleRs = db.executeQuery(vehicleSql, regNumber)) {
+                if (!vehicleRs.next()) {
+                    showAlert("Error", "Vehicle '" + regNumber + "' not found in database!");
+                    return;
+                }
+                int vehicleId = vehicleRs.getInt("vehicle_id");
 
-            if (!vehicleRs.next()) {
-                showAlert("Error", "Vehicle '" + regNumber + "' not found in database!");
-                return;
+                // Insert query
+                String sql = "INSERT INTO customer_queries (customer_id, vehicle_id, query_text, priority, status, query_date) VALUES (?, ?, ?, 'Normal', 'Pending', ?)";
+                int rowsAffected = db.executeUpdate(sql, currentCustomerId, vehicleId, queryText, Date.valueOf(LocalDate.now()));
+
+                if (rowsAffected > 0) {
+                    loadQueryHistoryFromDatabase();
+                    queryTextArea.clear();
+                    showAlert("Success", "Your query has been submitted successfully!");
+                    setupQueryPagination();
+
+                    submit.setStyle("-fx-background-color: #2ecc71;");
+                    new Thread(() -> {
+                        try {
+                            Thread.sleep(500);
+                            javafx.application.Platform.runLater(() ->
+                                    submit.setStyle("-fx-background-color: #3498db;"));
+                        } catch (InterruptedException e) {}
+                    }).start();
+                }
             }
-
-            int vehicleId = vehicleRs.getInt("vehicle_id");
-
-            // Insert query
-            String sql = "INSERT INTO customer_queries (customer_id, vehicle_id, query_text, priority, status, query_date) VALUES (?, ?, ?, 'Normal', 'Pending', ?)";
-            PreparedStatement pstmt = DBConnection.getConnection().prepareStatement(sql);
-            pstmt.setInt(1, currentCustomerId);
-            pstmt.setInt(2, vehicleId);
-            pstmt.setString(3, queryText);
-            pstmt.setDate(4, Date.valueOf(LocalDate.now()));
-
-            int rowsAffected = pstmt.executeUpdate();
-
-            if (rowsAffected > 0) {
-                loadQueryHistoryFromDatabase();
-                queryTextArea.clear();
-                showAlert("Success", "Your query has been submitted successfully!");
-                setupQueryPagination();
-
-                submit.setStyle("-fx-background-color: #2ecc71;");
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(500);
-                        javafx.application.Platform.runLater(() ->
-                                submit.setStyle("-fx-background-color: #3498db;"));
-                    } catch (InterruptedException e) {}
-                }).start();
-            }
-
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert("Database Error", "Could not submit query: " + e.getMessage());
@@ -352,8 +329,6 @@ public class CustomerController {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
-    // ==================== PUBLIC STATIC INNER CLASSES ====================
 
     public static class CustomerVehicle {
         private String registrationNumber;

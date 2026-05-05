@@ -53,28 +53,26 @@ public class AdminController {
 
     private ObservableList<User> users = FXCollections.observableArrayList();
     private ObservableList<String> activityLogs = FXCollections.observableArrayList();
+    private DBConnection db;
 
     @FXML
     public void initialize() {
-        // Setup table columns
+        db = DatabaseManager.getInstance();
+
         userIdCol.setCellValueFactory(new PropertyValueFactory<>("userId"));
         userNameCol.setCellValueFactory(new PropertyValueFactory<>("fullName"));
         userRoleCol.setCellValueFactory(new PropertyValueFactory<>("role"));
         userStatusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
 
-        // Setup role combo
         roleCombo.getItems().addAll("Admin", "Police Officer", "Customer", "Workshop Staff", "Insurance Agent");
         roleCombo.setValue("Customer");
 
-        // Load users from database
         loadUsersFromDatabase();
         loadActivityLogs();
         updateStatistics();
 
-        // Animate database progress
         animateDatabaseProgress();
 
-        // Add fade animation to statistics
         FadeTransition fade = new FadeTransition(Duration.seconds(1), statistics);
         fade.setFromValue(0);
         fade.setToValue(1);
@@ -85,10 +83,7 @@ public class AdminController {
         users.clear();
         String sql = "SELECT user_id, username, full_name, email, role, status FROM users ORDER BY user_id";
 
-        try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
+        try (ResultSet rs = db.executeQuery(sql)) {
             while (rs.next()) {
                 User user = new User();
                 user.setUserId(rs.getInt("user_id"));
@@ -99,67 +94,56 @@ public class AdminController {
                 user.setStatus(rs.getString("status"));
                 users.add(user);
             }
-
             userTable.setItems(users);
             toalUser.setText(String.valueOf(users.size()));
             totalUsersLabel.setText(String.valueOf(users.size()));
-
             System.out.println("Loaded " + users.size() + " users from database");
-
         } catch (SQLException e) {
             System.err.println("Error loading users: " + e.getMessage());
-            e.printStackTrace();
             showAlert("Database Error", "Could not load users from database: " + e.getMessage());
         }
     }
 
     private void loadActivityLogs() {
         activityLogs.clear();
-
         String sql = "SELECT action, description, created_at FROM system_logs ORDER BY created_at DESC LIMIT 20";
 
-        try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
+        try (ResultSet rs = db.executeQuery(sql)) {
             while (rs.next()) {
                 String timestamp = rs.getTimestamp("created_at").toLocalDateTime().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
                 String action = rs.getString("action");
                 String description = rs.getString("description");
                 activityLogs.add("[" + timestamp + "] " + action + " - " + description);
             }
-
             if (activityLogs.isEmpty()) {
                 activityLogs.add("[" + getCurrentTime() + "] System initialized");
             }
-
         } catch (SQLException e) {
             System.err.println("Error loading activity logs: " + e.getMessage());
             activityLogs.add("[" + getCurrentTime() + "] System ready");
         }
-
         activityLogList.setItems(activityLogs);
     }
 
     private void updateStatistics() {
-        try (Connection conn = DBConnection.getConnection()) {
+        try {
             String sql = "SELECT COUNT(*) as total FROM vehicles";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-            if (rs.next()) {
-                totalVehiclesLabel.setText(String.valueOf(rs.getInt("total")));
+            try (ResultSet rs = db.executeQuery(sql)) {
+                if (rs.next()) {
+                    totalVehiclesLabel.setText(String.valueOf(rs.getInt("total")));
+                }
             }
 
             String violationSql = "SELECT COUNT(*) as unpaid FROM violations WHERE status = 'Unpaid'";
-            rs = stmt.executeQuery(violationSql);
-            if (rs.next()) {
-                unpaidViolationsLabel.setText(String.valueOf(rs.getInt("unpaid")));
+            try (ResultSet rs = db.executeQuery(violationSql)) {
+                if (rs.next()) {
+                    unpaidViolationsLabel.setText(String.valueOf(rs.getInt("unpaid")));
+                }
             }
 
             totalServicesLabel.setText("0");
             activeReports.setText("0");
             totalUsersLabel.setText(String.valueOf(users.size()));
-
         } catch (SQLException e) {
             totalVehiclesLabel.setText("0");
             unpaidViolationsLabel.setText("0");
@@ -193,7 +177,7 @@ public class AdminController {
     @FXML
     void createUser(ActionEvent event) {
         String userName = userNameField.getText().trim();
-        String userId = userIdField.getText().trim();  // Now editable - user can type username
+        String userId = userIdField.getText().trim();
         String role = roleCombo.getValue();
 
         if (userName.isEmpty() || userId.isEmpty()) {
@@ -203,10 +187,7 @@ public class AdminController {
 
         // Check if username already exists
         String checkSql = "SELECT COUNT(*) FROM users WHERE username = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
-            checkStmt.setString(1, userId);
-            ResultSet rs = checkStmt.executeQuery();
+        try (ResultSet rs = db.executeQuery(checkSql, userId)) {
             if (rs.next() && rs.getInt(1) > 0) {
                 showAlert("Error", "Username already exists! Please choose a different username.");
                 return;
@@ -217,36 +198,19 @@ public class AdminController {
 
         // Insert into database
         String sql = "INSERT INTO users (username, full_name, role, status, password, email, created_at) VALUES (?, ?, ?, 'Active', 'password123', ?, NOW())";
+        int result = db.executeUpdate(sql, userId, userName, role, userId + "@vehicle.com");
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, userId);
-            pstmt.setString(2, userName);
-            pstmt.setString(3, role);
-            pstmt.setString(4, userId + "@vehicle.com");
-            pstmt.executeUpdate();
-
+        if (result > 0) {
             // Add to activity log
             String logSql = "INSERT INTO system_logs (user_id, action, description) VALUES (?, ?, ?)";
-            try (PreparedStatement logStmt = conn.prepareStatement(logSql)) {
-                logStmt.setInt(1, SessionManager.getCurrentUserId());
-                logStmt.setString(2, "User Created");
-                logStmt.setString(3, "New user '" + userName + "' created as " + role);
-                logStmt.executeUpdate();
-            }
+            db.executeUpdate(logSql, SessionManager.getCurrentUserId(), "User Created", "New user '" + userName + "' created as " + role);
 
-            // Refresh user list
             loadUsersFromDatabase();
-
-            // Clear fields
             userNameField.clear();
             userIdField.clear();
-
             updateStatistics();
             showAlert("Success", "User created successfully!");
 
-            // Animate button
             createuser.setStyle("-fx-background-color: #2ecc71;");
             new Thread(() -> {
                 try {
@@ -255,10 +219,8 @@ public class AdminController {
                             createuser.setStyle("-fx-background-color: #3498db;"));
                 } catch (InterruptedException e) {}
             }).start();
-
-        } catch (SQLException e) {
-            System.err.println("Error creating user: " + e.getMessage());
-            showAlert("Error", "Could not create user: " + e.getMessage());
+        } else {
+            showAlert("Error", "Could not create user!");
         }
     }
 
@@ -267,15 +229,12 @@ public class AdminController {
         User selected = userTable.getSelectionModel().getSelectedItem();
         if (selected != null) {
             String sql = "UPDATE users SET status = 'Active' WHERE user_id = ?";
-            try (Connection conn = DBConnection.getConnection();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setInt(1, selected.getUserId());
-                pstmt.executeUpdate();
-
+            int result = db.executeUpdate(sql, selected.getUserId());
+            if (result > 0) {
                 loadUsersFromDatabase();
                 showAlert("Success", "Access granted to " + selected.getFullName());
-            } catch (SQLException e) {
-                showAlert("Error", "Could not update user: " + e.getMessage());
+            } else {
+                showAlert("Error", "Could not update user!");
             }
         } else {
             showAlert("Error", "Please select a user first!");
@@ -287,15 +246,12 @@ public class AdminController {
         User selected = userTable.getSelectionModel().getSelectedItem();
         if (selected != null) {
             String sql = "UPDATE users SET status = 'Inactive' WHERE user_id = ?";
-            try (Connection conn = DBConnection.getConnection();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setInt(1, selected.getUserId());
-                pstmt.executeUpdate();
-
+            int result = db.executeUpdate(sql, selected.getUserId());
+            if (result > 0) {
                 loadUsersFromDatabase();
                 showAlert("Success", "Access revoked for " + selected.getFullName());
-            } catch (SQLException e) {
-                showAlert("Error", "Could not update user: " + e.getMessage());
+            } else {
+                showAlert("Error", "Could not update user!");
             }
         } else {
             showAlert("Error", "Please select a user first!");
@@ -337,7 +293,6 @@ public class AdminController {
         confirm.setTitle("Confirm Restore");
         confirm.setHeaderText("Restore Database");
         confirm.setContentText("Are you sure you want to restore the database? This will overwrite current data.");
-
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 showAlert("Restore Initiated", "Database restore has been started.");
@@ -350,7 +305,6 @@ public class AdminController {
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("System Logs");
         dialog.setHeaderText("Complete System Activity Logs");
-
         TextArea textArea = new TextArea();
         StringBuilder logs = new StringBuilder();
         for (String log : activityLogs) {
@@ -360,7 +314,6 @@ public class AdminController {
         textArea.setEditable(false);
         textArea.setPrefHeight(400);
         textArea.setPrefWidth(500);
-
         dialog.getDialogPane().setContent(textArea);
         dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
         dialog.showAndWait();
@@ -381,5 +334,6 @@ public class AdminController {
     }
 
     public void roleCombo(ActionEvent actionEvent) {
+
     }
 }

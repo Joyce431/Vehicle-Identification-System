@@ -9,13 +9,15 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class HelloApplication extends Application {
-    public static DBConnection DB;
 
     private static Stage primaryStage;
 
     @Override
     public void start(Stage stage) throws IOException {
         primaryStage = stage;
+
+        // Initialize database connection at startup
+        DatabaseManager.getInstance();
 
         // Load login FXML
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("login.fxml"));
@@ -24,6 +26,7 @@ public class HelloApplication extends Application {
         Scene scene = new Scene(root, 900, 700);
 
         // Apply CSS if exists
+
         try {
             scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         } catch (Exception e) {
@@ -40,7 +43,7 @@ public class HelloApplication extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxml));
             Parent root = loader.load();
-            Scene scene = new Scene(root, 900, 600);
+            Scene scene = new Scene(root, 1200, 800);
 
             try {
                 scene.getStylesheets().add(HelloApplication.class.getResource("style.css").toExternalForm());

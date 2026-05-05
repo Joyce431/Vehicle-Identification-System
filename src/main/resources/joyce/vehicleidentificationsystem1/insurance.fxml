@@ -14,110 +14,115 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="15" alignment="TOP_CENTER"
-      xmlns="http://javafx.com/javafx/17"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="joyce.vehicleidentificationsystem1.InsuranceController">
+<VBox alignment="TOP_CENTER" spacing="15" style="-fx-background-color: gray;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="joyce.vehicleidentificationsystem1.InsuranceController">
 
     <padding>
-        <Insets top="20" bottom="20" left="20" right="20"/>
+        <Insets bottom="20" left="20" right="20" top="20" />
     </padding>
 
     <!-- TITLE -->
-    <Label text="Insurance Module"
-           style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+    <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Insurance Module" />
 
-    <Separator/>
+    <Separator />
 
     <!-- ADD INSURANCE -->
-    <TitledPane text="Add Insurance" expanded="true">
+    <TitledPane expanded="true" text="Add Insurance">
         <GridPane hgap="10" vgap="10">
             <padding>
-                <Insets top="10" bottom="10" left="10" right="10"/>
+                <Insets bottom="10" left="10" right="10" top="10" />
             </padding>
 
-            <Label text="Vehicle:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-            <ComboBox fx:id="vehicleCombo" prefWidth="200"
-                      GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <Label text="Vehicle:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <ComboBox fx:id="vehicleCombo" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-            <Label text="Company:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-            <TextField fx:id="companyField"
-                       GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            <Label text="Company:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <TextField fx:id="companyField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-            <Label text="Policy No:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-            <TextField fx:id="policyField"
-                       GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            <Label text="Policy No:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <TextField fx:id="policyField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-            <Label text="Expiry Date:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-            <DatePicker fx:id="expiryDate"
-                        GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+            <Label text="Expiry Date:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+            <DatePicker fx:id="expiryDate" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
-            <Label fx:id="validation" text="" textFill="red"
-                   GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+            <Label fx:id="validation" text="" textFill="red" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="4" />
 
-            <Button text="Add Insurance"
-                    onAction="#addInsurance"
-                    style="-fx-background-color: green; -fx-text-fill: white;"
-                    GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2">
+            <Button onAction="#addInsurance" style="-fx-background-color: green; -fx-text-fill: white;" text="Add Insurance" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="5">
                 <effect>
-                    <DropShadow/>
+                    <DropShadow height="38.59" radius="19.527500000000003" width="41.52" />
                 </effect>
             </Button>
+         <columnConstraints>
+            <ColumnConstraints />
+            <ColumnConstraints />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+         </rowConstraints>
         </GridPane>
     </TitledPane>
 
     <!-- STATUS -->
-    <Label text="Insurance Status" style="-fx-font-weight: bold;"/>
+    <Label style="-fx-font-weight: bold;" text="Insurance Status" />
 
-    <HBox spacing="20" alignment="CENTER">
+    <HBox alignment="CENTER" spacing="20">
         <VBox alignment="CENTER">
-            <Label text="Validity"/>
-            <ProgressBar fx:id="insuranceProgress" progress="0.6" prefWidth="150"/>
+            <Label text="Validity" />
+            <ProgressBar fx:id="insuranceProgress" prefWidth="150" progress="0.6" />
         </VBox>
 
         <VBox alignment="CENTER">
-            <Label text="Overall Coverage"/>
-            <ProgressIndicator fx:id="coverageIndicator" progress="0.75"/>
+            <Label text="Overall Coverage" />
+            <ProgressIndicator fx:id="coverageIndicator" progress="0.75" />
         </VBox>
 
         <VBox alignment="CENTER">
-            <Label text="Active Policies"/>
-            <Label fx:id="instatus" text="0" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: green;"/>
+            <Label text="Active Policies" />
+            <Label fx:id="instatus" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: green;" text="0" />
         </VBox>
 
         <VBox alignment="CENTER">
-            <Label text="Expiring Soon"/>
-            <Label fx:id="insurance" text="0" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: orange;"/>
+            <Label text="Expiring Soon" />
+            <Label fx:id="insurance" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: orange;" text="0" />
         </VBox>
 
         <VBox alignment="CENTER">
-            <Label text="Total Records"/>
-            <Label fx:id="inrecords" text="0" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: blue;"/>
+            <Label text="Total Records" />
+            <Label fx:id="inrecords" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: blue;" text="0" />
         </VBox>
 
         <VBox alignment="CENTER">
-            <Label text="Overall Rating"/>
-            <Label fx:id="overall" text="0%" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: purple;"/>
+            <Label text="Overall Rating" />
+            <Label fx:id="overall" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: purple;" text="0%" />
         </VBox>
     </HBox>
 
     <!-- TABLE -->
-    <Label text="Insurance Records" style="-fx-font-weight: bold;"/>
+    <Label style="-fx-font-weight: bold;" text="Insurance Records" />
 
     <TableView fx:id="insuranceTable" prefHeight="200">
         <columns>
-            <TableColumn fx:id="tcol1" text="Policy Number" prefWidth="150"/>
-            <TableColumn fx:id="tcol2" text="Vehicle Number" prefWidth="120"/>
-            <TableColumn fx:id="tcol3" text="Company" prefWidth="150"/>
-            <TableColumn fx:id="tcol4" text="Expiry Date" prefWidth="120"/>
+            <TableColumn fx:id="tcol1" prefWidth="150" text="Policy Number" />
+            <TableColumn fx:id="tcol2" prefWidth="120" text="Vehicle Number" />
+            <TableColumn fx:id="tcol3" prefWidth="150" text="Company" />
+            <TableColumn fx:id="tcol4" prefWidth="120" text="Expiry Date" />
         </columns>
     </TableView>
 
     <!-- PAGINATION -->
-    <Pagination fx:id="insurancePagination" pageCount="5"/>
+    <Pagination fx:id="insurancePagination" pageCount="5">
+      <effect>
+         <DropShadow height="44.45" radius="20.9925" width="41.52" />
+      </effect></Pagination>
 
 </VBox>

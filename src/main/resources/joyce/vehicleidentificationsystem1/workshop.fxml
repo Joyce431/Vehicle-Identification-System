@@ -12,115 +12,137 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
 
-<VBox fx:id="vbox" alignment="TOP_CENTER" prefWidth="900" spacing="15" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="joyce.vehicleidentificationsystem1.WorkshopController">
+<!-- MAIN SCROLLPANE - Wraps entire content to make it scrollable -->
 
-    <padding>
-        <Insets bottom="20" left="20" right="20" top="20" />
-    </padding>
+<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="joyce.vehicleidentificationsystem1.WorkshopController">
+    <content>
+        <VBox fx:id="vbox" alignment="TOP_CENTER" spacing="15" style="-fx-background-color: gray;">
 
-    <Label fx:id="workshop" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Workshop Module - Vehicle Registration &amp; Service Records" />
+            <Label fx:id="workshop" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Workshop Module - Vehicle Registration &amp; Service Records" textFill="#141414" />
 
-    <Separator fx:id="separator" />
+            <Separator fx:id="separator" />
 
-    <!-- Register New Vehicle -->
-    <TitledPane fx:id="titlepane" expanded="true" text="Register New Vehicle">
-        <GridPane fx:id="gritpane" hgap="10" vgap="10">
-            <padding><Insets bottom="10" left="10" right="10" top="10" /></padding>
+            <!-- Register New Vehicle -->
+            <TitledPane fx:id="titlepane" expanded="true" text="Register New Vehicle">
+                <GridPane fx:id="gritpane" hgap="10" vgap="10">
+                    <padding><Insets bottom="10" left="10" right="10" top="10" /></padding>
 
-            <Label fx:id="label1" text="Registration Number:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-            <TextField fx:id="regNumberField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                    <Label fx:id="label1" text="Registration Number:" textFill="#141414" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                    <TextField fx:id="regNumberField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-            <Label fx:id="label2" text="Make:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-            <TextField fx:id="makeField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                    <Label fx:id="label2" text="Make:" textFill="#141414" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                    <TextField fx:id="makeField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-            <Label fx:id="label3" text="Model:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-            <TextField fx:id="modelField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                    <Label fx:id="label3" text="Model:" textFill="#171717" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                    <TextField fx:id="modelField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-            <Label fx:id="label4" text="Year:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-            <TextField fx:id="yearField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                    <Label fx:id="label4" text="Year:" textFill="#171717" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                    <TextField fx:id="yearField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
-            <Label fx:id="label5" text="Owner Name:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-            <TextField fx:id="ownerNameField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                    <Label fx:id="label5" text="Owner Name:" textFill="#222121" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                    <TextField fx:id="ownerNameField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
-            <Button fx:id="register" onAction="#registerVehicle" prefWidth="150" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Register Vehicle" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="5" />
-         <columnConstraints>
-            <ColumnConstraints />
-            <ColumnConstraints />
-         </columnConstraints>
-         <rowConstraints>
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-         </rowConstraints>
-        </GridPane>
-    </TitledPane>
+                    <Button fx:id="register" onAction="#registerVehicle" prefWidth="150" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Register Vehicle" textFill="#111111" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="5">
+                  <effect>
+                     <DropShadow height="29.79" radius="16.595" width="38.59">
+                        <color>
+                           <Color red="0.9473684430122375" green="0.05701754242181778" blue="0.05701754242181778" />
+                        </color>
+                     </DropShadow>
+                  </effect></Button>
 
-    <!-- Service Record Entry -->
-    <TitledPane fx:id="titlepane2" expanded="true" text="Add Service Record">
-        <GridPane hgap="10" vgap="10">
-            <padding><Insets bottom="10" left="10" right="10" top="10" /></padding>
+                    <columnConstraints>
+                        <ColumnConstraints />
+                        <ColumnConstraints />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                    </rowConstraints>
+                </GridPane>
+            </TitledPane>
 
-            <Label text="Select Vehicle:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-            <ComboBox fx:id="vehicleSelect" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+            <!-- Service Record Entry -->
+            <TitledPane fx:id="titlepane2" expanded="true" text="Add Service Record">
+                <GridPane hgap="10" vgap="10">
+                    <padding><Insets bottom="10" left="10" right="10" top="10" /></padding>
 
-            <Label text="Service Date:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-            <DatePicker fx:id="serviceDatePicker" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                    <Label text="Select Vehicle:" textFill="#1e1d1d" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                    <ComboBox fx:id="vehicleSelect" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-            <Label text="Service Type:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-            <ComboBox fx:id="serviceTypeCombo" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                    <Label text="Service Date:" textFill="#171717" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                    <DatePicker fx:id="serviceDatePicker" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-            <Label text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-            <TextArea fx:id="serviceDescription" prefHeight="60" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                    <Label text="Service Type:" textFill="#171717" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                    <ComboBox fx:id="serviceTypeCombo" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-            <Label text="Cost:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-            <TextField fx:id="costField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                    <Label text="Description:" textFill="#0a0a0a" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                    <TextArea fx:id="serviceDescription" prefHeight="60" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
-            <Button onAction="#addServiceRecord" prefWidth="150" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="Add Service Record" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="5" />
-         <columnConstraints>
-            <ColumnConstraints />
-            <ColumnConstraints />
-         </columnConstraints>
-         <rowConstraints>
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-         </rowConstraints>
-        </GridPane>
-    </TitledPane>
+                    <Label text="Cost:" textFill="#1b1a1a" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                    <TextField fx:id="costField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
-    <!-- Service History Table -->
-    <Label fx:id="history" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Service History" />
+                    <Button onAction="#addServiceRecord" prefWidth="150" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="Add Service Record" textFill="#141414" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="5">
+                  <effect>
+                     <DropShadow height="59.1" radius="32.7125" width="73.75">
+                        <color>
+                           <Color red="0.02631578966975212" green="0.025462962687015533" blue="0.025462962687015533" />
+                        </color>
+                     </DropShadow>
+                  </effect></Button>
 
-    <TableView fx:id="serviceHistoryTable" prefHeight="250">
-        <columns>
-            <TableColumn fx:id="serviceDateCol" prefWidth="100" text="Service Date" />
-            <TableColumn fx:id="serviceTypeCol" prefWidth="120" text="Service Type" />
-            <TableColumn fx:id="serviceDescCol" prefWidth="250" text="Description" />
-            <TableColumn fx:id="costCol" prefWidth="100" text="Cost" />
-        </columns>
-    </TableView>
+                    <columnConstraints>
+                        <ColumnConstraints />
+                        <ColumnConstraints />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                    </rowConstraints>
+                </GridPane>
+            </TitledPane>
 
-    <!-- ScrollPane with Vehicle List -->
-    <Label fx:id="registered" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Registered Vehicles" />
+            <!-- Service History Table -->
+            <Label fx:id="history" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Service History" textFill="#252525" />
 
-    <ScrollPane fx:id="scrollpane" fitToWidth="true" prefHeight="150">
-        <VBox fx:id="vehicleListContainer" spacing="5">
-            <Label fx:id="text1" text="1. ABC123 - Toyota Camry 2020 - Owner: Neo Sello" />
-            <Label fx:id="txt2" text="2. XYZ789 - Honda Civic 2021 - Owner: Joyce Koetle" />
-            <Label fx:id="txt3" text="3. DEF456 - Ford Mustang 2019 - Owner: Tsepo Leboto" />
-            <Label fx:id="txt4" text="4. GHI789 - BMW X5 2022 - Owner: Tumo Koloi" />
-            <Label fx:id="txt5" text="5. JKL012 - Mercedes C200 2021 - Owner: Moabi Lereng" />
+            <TableView fx:id="serviceHistoryTable" prefHeight="250">
+                <columns>
+                    <TableColumn fx:id="serviceDateCol" prefWidth="100" text="Service Date" />
+                    <TableColumn fx:id="serviceTypeCol" prefWidth="120" style="-fx-background: black;" text="Service Type" />
+                    <TableColumn fx:id="serviceDescCol" prefWidth="250" text="Description" />
+                    <TableColumn fx:id="costCol" prefWidth="100" text="Cost" />
+                </columns>
+            </TableView>
+
+            <!-- ScrollPane with Vehicle List (Internal scroll for vehicle list) -->
+            <Label fx:id="registered" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Registered Vehicles" />
+
+            <ScrollPane fx:id="scrollpane" fitToWidth="true" prefHeight="150" style="-fx-background-color: white; -fx-border-color: #bdc3c7; -fx-border-radius: 5;">
+                <VBox fx:id="vehicleListContainer" spacing="5" style="-fx-padding: 10;">
+                    <!-- Dynamic vehicle list will be populated by controller -->
+                    <Label fx:id="text1" text="1. ABC123 - Toyota Camry 2020 - Owner: Neo Sello" textFill="#141414" />
+                    <Label fx:id="txt2" text="2. XYZ789 - Honda Civic 2021 - Owner: Joyce Koetle" textFill="#141414" />
+                    <Label fx:id="txt3" text="3. DEF456 - Ford Mustang 2019 - Owner: Tsepo Leboto" textFill="#141414" />
+                    <Label fx:id="txt4" text="4. GHI789 - BMW X5 2022 - Owner: Tumo Koloi" textFill="#0d0d0d" />
+                    <Label fx:id="txt5" text="5. JKL012 - Mercedes C200 2021 - Owner: Moabi Lereng" textFill="#171717" />
+                </VBox>
+            </ScrollPane>
+
         </VBox>
-    </ScrollPane>
-</VBox>
+    </content>
+</ScrollPane>

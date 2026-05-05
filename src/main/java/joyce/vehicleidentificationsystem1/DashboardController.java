@@ -53,9 +53,12 @@ public class DashboardController {
     @FXML private VBox dummyContentBox;
 
     private ObservableList<Violation> violationsList = FXCollections.observableArrayList();
+    private DBConnection db;
 
     @FXML
     public void initialize() {
+        db = DatabaseManager.getInstance();
+
         violationTypeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
         fineAmountCol.setCellValueFactory(new PropertyValueFactory<>("fineAmount"));
         statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -523,9 +526,6 @@ public class DashboardController {
     @FXML
     void Exit(ActionEvent event) {
         handleExit(event);
-    }
-
-    public void file(ActionEvent actionEvent) {
     }
 }
 

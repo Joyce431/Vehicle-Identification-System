@@ -6,7 +6,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -43,10 +42,12 @@ public class InsuranceController {
     @FXML private ComboBox<String> vehicleCombo;
 
     private ObservableList<InsurancePolicyData> policies = FXCollections.observableArrayList();
+    private DBConnection db;
 
     @FXML
     public void initialize() {
-        // Setup table columns using lambda expressions (more reliable)
+        db = DatabaseManager.getInstance();
+
         if (tcol1 != null) {
             tcol1.setCellValueFactory(cellData ->
                     new javafx.beans.property.SimpleStringProperty(cellData.getValue().getPolicyNumber()));
@@ -58,19 +59,10 @@ public class InsuranceController {
                     new javafx.beans.property.SimpleStringProperty(cellData.getValue().getExpiryDateString()));
         }
 
-        // Load vehicles from database
         loadVehiclesFromDatabase();
-
-        // Load insurance policies from database
         loadInsurancePoliciesFromDatabase();
-
-        // Setup pagination
         setupPagination();
-
-        // Animate progress
         animateProgress();
-
-        // Update statistics
         updateStatistics();
 
         System.out.println("InsuranceController initialized successfully!");
@@ -80,26 +72,19 @@ public class InsuranceController {
         vehicleCombo.getItems().clear();
         String sql = "SELECT registration_number, make, model FROM vehicles WHERE status = 'Active'";
 
-        try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
+        try (ResultSet rs = db.executeQuery(sql)) {
             while (rs.next()) {
                 String vehicleInfo = rs.getString("registration_number") + " - " +
                         rs.getString("make") + " " +
                         rs.getString("model");
                 vehicleCombo.getItems().add(vehicleInfo);
             }
-
             if (!vehicleCombo.getItems().isEmpty()) {
                 vehicleCombo.setValue(vehicleCombo.getItems().get(0));
             }
-
             System.out.println("Loaded " + vehicleCombo.getItems().size() + " vehicles");
-
         } catch (SQLException e) {
             System.err.println("Error loading vehicles: " + e.getMessage());
-            // Fallback sample data
             vehicleCombo.getItems().addAll("ABC123 - Toyota Camry", "XYZ789 - Honda Civic", "DEF456 - Ford Mustang");
             vehicleCombo.setValue("ABC123 - Toyota Camry");
         }
@@ -112,10 +97,7 @@ public class InsuranceController {
                 "JOIN vehicles v ON ip.vehicle_id = v.vehicle_id " +
                 "ORDER BY ip.policy_id DESC";
 
-        try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
+        try (ResultSet rs = db.executeQuery(sql)) {
             while (rs.next()) {
                 InsurancePolicyData policy = new InsurancePolicyData(
                         rs.getString("policy_number"),
@@ -125,17 +107,13 @@ public class InsuranceController {
                 );
                 policies.add(policy);
             }
-
             insuranceTable.setItems(policies);
             if (inrecords != null) {
                 inrecords.setText(String.valueOf(policies.size()));
             }
-
             System.out.println("Loaded " + policies.size() + " insurance policies");
-
         } catch (SQLException e) {
             System.err.println("Error loading insurance policies: " + e.getMessage());
-            // Add sample data if no policies exist
             addSamplePolicies();
         }
     }
@@ -178,12 +156,8 @@ public class InsuranceController {
                 for (double i = 0; i <= 0.75; i += 0.01) {
                     final double progress = i;
                     javafx.application.Platform.runLater(() -> {
-                        if (insuranceProgress != null) {
-                            insuranceProgress.setProgress(progress);
-                        }
-                        if (coverageIndicator != null) {
-                            coverageIndicator.setProgress(progress);
-                        }
+                        if (insuranceProgress != null) insuranceProgress.setProgress(progress);
+                        if (coverageIndicator != null) coverageIndicator.setProgress(progress);
                     });
                     Thread.sleep(20);
                 }
@@ -197,19 +171,13 @@ public class InsuranceController {
         long activePolicies = policies.stream()
                 .filter(p -> p.getExpiryDate().isAfter(LocalDate.now()))
                 .count();
-
-        if (instatus != null) {
-            instatus.setText(String.valueOf(activePolicies));
-        }
+        if (instatus != null) instatus.setText(String.valueOf(activePolicies));
 
         long expiringSoon = policies.stream()
                 .filter(p -> ChronoUnit.DAYS.between(LocalDate.now(), p.getExpiryDate()) <= 30 &&
                         p.getExpiryDate().isAfter(LocalDate.now()))
                 .count();
-
-        if (insurance != null) {
-            insurance.setText(String.valueOf(expiringSoon));
-        }
+        if (insurance != null) insurance.setText(String.valueOf(expiringSoon));
 
         if (overall != null) {
             if (policies.size() > 0) {
@@ -241,58 +209,46 @@ public class InsuranceController {
         try {
             // Get vehicle ID
             String vehicleSql = "SELECT vehicle_id FROM vehicles WHERE registration_number = ?";
-            PreparedStatement vehicleStmt = DBConnection.getConnection().prepareStatement(vehicleSql);
-            vehicleStmt.setString(1, regNumber);
-            ResultSet vehicleRs = vehicleStmt.executeQuery();
-            int vehicleId = vehicleRs.next() ? vehicleRs.getInt("vehicle_id") : -1;
-
-            if (vehicleId == -1) {
-                if (validation != null) {
-                    validation.setText("Vehicle not found in database!");
-                    validation.setStyle("-fx-text-fill: red;");
+            try (ResultSet vehicleRs = db.executeQuery(vehicleSql, regNumber)) {
+                if (!vehicleRs.next()) {
+                    if (validation != null) {
+                        validation.setText("Vehicle not found in database!");
+                        validation.setStyle("-fx-text-fill: red;");
+                    }
+                    return;
                 }
-                return;
+                int vehicleId = vehicleRs.getInt("vehicle_id");
+
+                // Insert into database
+                String sql = "INSERT INTO insurance_policies (policy_number, vehicle_id, provider, policy_type, start_date, end_date, premium_amount, status) " +
+                        "VALUES (?, ?, ?, 'Comprehensive', ?, ?, 0, 'Active')";
+                int result = db.executeUpdate(sql, policyNumber, vehicleId, company, Date.valueOf(LocalDate.now()), Date.valueOf(expiry));
+
+                if (result > 0) {
+                    InsurancePolicyData newPolicy = new InsurancePolicyData(policyNumber, regNumber, company, expiry);
+                    policies.add(0, newPolicy);
+                    insuranceTable.refresh();
+
+                    companyField.clear();
+                    policyField.clear();
+                    expiryDate.setValue(null);
+
+                    if (validation != null) {
+                        validation.setText("Insurance policy added successfully!");
+                        validation.setStyle("-fx-text-fill: green;");
+                    }
+
+                    updateStatistics();
+                    if (inrecords != null) inrecords.setText(String.valueOf(policies.size()));
+                    setupPagination();
+
+                    FadeTransition fade = new FadeTransition(Duration.millis(500), validation);
+                    fade.setFromValue(1);
+                    fade.setToValue(0);
+                    fade.setDelay(Duration.seconds(2));
+                    fade.play();
+                }
             }
-
-            // Insert into database
-            String sql = "INSERT INTO insurance_policies (policy_number, vehicle_id, provider, policy_type, start_date, end_date, premium_amount, status) " +
-                    "VALUES (?, ?, ?, 'Comprehensive', ?, ?, 0, 'Active')";
-            PreparedStatement pstmt = DBConnection.getConnection().prepareStatement(sql);
-            pstmt.setString(1, policyNumber);
-            pstmt.setInt(2, vehicleId);
-            pstmt.setString(3, company);
-            pstmt.setDate(4, Date.valueOf(LocalDate.now()));
-            pstmt.setDate(5, Date.valueOf(expiry));
-            pstmt.executeUpdate();
-
-            // Add to local list
-            InsurancePolicyData newPolicy = new InsurancePolicyData(policyNumber, regNumber, company, expiry);
-            policies.add(0, newPolicy);
-            insuranceTable.refresh();
-
-            // Clear fields
-            companyField.clear();
-            policyField.clear();
-            expiryDate.setValue(null);
-
-            if (validation != null) {
-                validation.setText("Insurance policy added successfully!");
-                validation.setStyle("-fx-text-fill: green;");
-            }
-
-            updateStatistics();
-            if (inrecords != null) {
-                inrecords.setText(String.valueOf(policies.size()));
-            }
-            setupPagination(); // Refresh pagination
-
-            // Animate effect
-            FadeTransition fade = new FadeTransition(Duration.millis(500), validation);
-            fade.setFromValue(1);
-            fade.setToValue(0);
-            fade.setDelay(Duration.seconds(2));
-            fade.play();
-
         } catch (SQLException e) {
             System.err.println("Error adding insurance: " + e.getMessage());
             if (validation != null) {
@@ -303,7 +259,6 @@ public class InsuranceController {
     }
 }
 
-// InsurancePolicyData Class
 class InsurancePolicyData {
     private String policyNumber;
     private String vehicleNumber;

@@ -29,22 +29,16 @@
     -fx-font-size: 13px;
 }
 
-/* ========== RECENT ACTIVITIES STYLES - BLACK TEXT ========== */
+/* Activity Item Styles */
 .activity-item {
     -fx-padding: 8;
     -fx-background-color: #f8f9fa;
     -fx-background-radius: 5;
     -fx-border-color: #dee2e6;
     -fx-border-width: 0 0 1 0;
-    -fx-text-fill: #000000;  /* BLACK TEXT */
-    -fx-font-weight: normal;
 }
 
-.activity-item .text {
-    -fx-fill: #000000;  /* BLACK TEXT */
-}
-
-/* ========== VEHICLE RECORDS STYLES - BLACK TEXT ========== */
+/* Pagination Styles */
 .pagination-box {
     -fx-padding: 15;
     -fx-background-color: white;
@@ -55,17 +49,11 @@
     -fx-padding: 8;
     -fx-background-color: #e8f4f8;
     -fx-background-radius: 5;
-    -fx-text-fill: #000000;  /* BLACK TEXT */
-    -fx-font-weight: bold;
-}
-
-.vehicle-label .text {
-    -fx-fill: #000000;  /* BLACK TEXT */
 }
 
 .page-label {
     -fx-font-size: 11px;
-    -fx-text-fill: #000000;  /* BLACK TEXT (changed from gray to black) */
+    -fx-text-fill: #7f8c8d;
     -fx-padding: 5 0 0 0;
 }
 
@@ -133,4 +121,9 @@
 
 .button:hover {
     -fx-opacity: 0.9;
+}
+
+/* Label Styles */
+.label {
+    -fx-text-fill: #2c3e50;
 }

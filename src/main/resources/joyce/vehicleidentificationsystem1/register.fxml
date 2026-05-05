@@ -89,7 +89,10 @@
                     <!-- Register Button -->
                     <Button fx:id="register" onAction="#register" prefHeight="40" prefWidth="400" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10; -fx-background-radius: 5;" text="REGISTER">
                         <effect>
-                            <DropShadow color="rgba(52,152,219,0.5)" offsetX="2" offsetY="2" radius="5" />
+                            <DropShadow height="60.83" offsetX="2.0" offsetY="2.0" radius="30.6475" width="63.76">
+                        <color>
+                           <Color red="0.0903996080160141" green="0.09142300486564636" blue="0.09210526198148727" opacity="0.5" />
+                        </color></DropShadow>
                         </effect>
                     </Button>
 
